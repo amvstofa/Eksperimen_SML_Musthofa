@@ -3,7 +3,6 @@ import numpy as np
 import os
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
-import mlflow
 
 def preprocessing_obesity(filepath, output_dir):
     df = pd.read_csv(filepath)
@@ -39,34 +38,18 @@ def preprocessing_obesity(filepath, output_dir):
     y_train.to_csv(os.path.join(output_dir, "y_train.csv"), index=False)
     y_test.to_csv(os.path.join(output_dir, "y_test.csv"), index=False)
 
-    return {
-        "rows_clean": df.shape[0],
-        "files": [
-            os.path.join(output_dir, "X_train.csv"),
-            os.path.join(output_dir, "X_test.csv"),
-            os.path.join(output_dir, "y_train.csv"),
-            os.path.join(output_dir, "y_test.csv"),
-        ]
-    }
+    print(f"Preprocessing selesai. Jumlah baris setelah dibersihkan: {df.shape[0]}")
+    print("File disimpan di:")
+    print(f"- {os.path.join(output_dir, 'X_train.csv')}")
+    print(f"- {os.path.join(output_dir, 'X_test.csv')}")
+    print(f"- {os.path.join(output_dir, 'y_train.csv')}")
+    print(f"- {os.path.join(output_dir, 'y_test.csv')}")
 
 if __name__ == "__main__":
     input_file = os.path.join("..", "obes_raw", "obesity_data.csv")
-    output_dir = os.path.join(os.environ.get("GITHUB_WORKSPACE", "."), "preprocessing/output")
+    output_dir = os.path.join(".", "preprocessing_output")
 
     print(f"Input file: {input_file}")
     print(f"Output dir: {output_dir}")
 
-    mlruns_path = os.path.join(output_dir, "mlruns")
-    os.makedirs(mlruns_path, exist_ok=True)
-    mlflow.set_tracking_uri(f"file:{mlruns_path}")
-    mlflow.set_experiment("Preprocessing_Obesity")
-
-    with mlflow.start_run(run_name="Obesity_Preprocessing"):
-        result = preprocessing_obesity(input_file, output_dir)
-
-        mlflow.log_param("input_file", input_file)
-        mlflow.log_param("output_dir", output_dir)
-        mlflow.log_metric("rows_clean", result["rows_clean"])
-
-        for file in result["files"]:
-            mlflow.log_artifact(file)
+    preprocessing_obesity(input_file, output_dir)
